@@ -56,7 +56,6 @@ export const Title = styled.h1`
 export const ButtonContainer = styled.div`
   display: flex;
   justify-content: flex-end;
-  background-color: red;
   margin: 30px 0;
   width: 100%;
 `

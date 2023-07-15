@@ -28,28 +28,42 @@ export const FormContainer = styled.div`
   flex-direction: row;
 `
 
-export const Container = styled.div`
-  position: absolute;
-  align-items: center;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  display: flex;
+export const Content = styled.div`
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   background-color: ${props => props.theme.colors.secondary};
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
   border-radius: 10px;
-  height: 90vh;
-  width: 80%;
-`
+  width: 70%;
+  height: 100%;
+`;
+
+export const Container = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
 
 export const Header = styled.div`
   display: flex;
   flex-direction: row;
+  justify-content: space-around;
+  width: 100%;
+  margin-bottom: 40px;
+`
+
+export const Search = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 `
 
 export const Title = styled.h1`
-  font-size: 24px;
+  font-size: 40px;
+  font-weight: 900;
   color: ${props => props.theme.colors.white};
 `
 

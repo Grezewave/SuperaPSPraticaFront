@@ -1,9 +1,12 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import DateInput from '../../components/DateInput';
-import { Button, ButtonContainer, Container, FormContainer, Header, ThemeToogle, Title } from './styles';
+import { Button, ButtonContainer, Container, Content, FormContainer, Header, Search, ThemeToogle, Title } from './styles';
 import { useTheme } from '../../hooks/theme';
 import Toggle from '../../components/Toggle';
-import Table from '../../components/Table';
+import TableComponent from '../../components/Table';
+import { StatementController } from './controler';
+import SimpleInput from '../../components/SimpleInput';
+import ErrorMessage from '../../components/ErrorMessage';
 
 type Data = {
   data: string;
@@ -12,67 +15,118 @@ type Data = {
   operator: string;
 }
 
-const dadosExemplo: Data[] = [
-  { data: '01/01/2023', value: 100, type: 'Entrada', operator: 'João' },
-  { data: '02/01/2023', value: -50, type: 'Saída', operator: 'Maria' },
-  { data: '03/01/2023', value: 200, type: 'Entrada', operator: 'Pedro' },
-  { data: '04/01/2023', value: -75, type: 'Saída', operator: 'Ana' },
-  { data: '05/01/2023', value: 150, type: 'Entrada', operator: 'José' },
-  { data: '06/01/2023', value: -30, type: 'Saída', operator: 'Laura' },
-  { data: '07/01/2023', value: 80, type: 'Entrada', operator: 'Carlos' },
-  { data: '08/01/2023', value: -20, type: 'Saída', operator: 'Mariana' },
-  { data: '09/01/2023', value: 120, type: 'Entrada', operator: 'Roberto' },
-  { data: '10/01/2023', value: -10, type: 'Saída', operator: 'Renata' },
-];
+type StatementData = {
+  id: number;
+  transactionDate: string;
+  amount: number;
+  type: string;
+  transactionOperatorName: string;
+  account: {
+    accountId: number;
+    responsibleName: string;
+  };
+};
 
 const Statement: React.FC = () =>{
     const {toggleTheme, theme} = useTheme();
-
-    console.log(theme)
     
     const [darkTheme, setDarkTheme] = useState(() => theme.title === 'dark' ? true : false);
-    const [dateValue, setDateValue] = useState('');
+    const [startDateValue, setStartDateValue] = useState('');
+    const [endDateValue, setEndDateValue] = useState('');
+    const [operator, setOperator] = useState('');
+    const [message, setMessage] = useState('');
+    const [error, setError] = useState(true);
+
+    const [data, setData] = useState<Data[]>([]);
+
+    function convertDateFormat(inputDate: string): string {
+      const date = new Date(inputDate);
+      const day = String(date.getDate()).padStart(2, '0');
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const year = String(date.getFullYear());
     
+      return `${day}/${month}/${year}`;
+    }    
     
+    const doSearch = () => {
+      StatementController(startDateValue, endDateValue, operator)
+      .then((response) => {
+        const newData = response.data.map((statement: StatementData) => {
+          return {
+            data: convertDateFormat(statement.transactionDate),
+            value: statement.amount,
+            type: statement.type,
+            operator: statement.transactionOperatorName,
+          }
+        })
+        setData(newData)
+      }).catch((error) => {
+        console.log(error)
+      })
+    }
+
+    const handleSubmit = (event: React.FormEvent) => {
+      event.preventDefault();
+      if ((startDateValue === '' && endDateValue !== '') 
+        || (startDateValue !== '' && endDateValue === '')) {
+        setMessage('É necessário preencher as duas datas ou nenhuma delas');
+        setError(true);
+        return
+      }
+      setError(false);
+      doSearch()
+    }
 
     const handleToggleTheme = () => {
       setDarkTheme(!darkTheme);
       toggleTheme();
     }
 
-    const handleDateChange = (date: string) => {
-      setDateValue(date);
-    };
-  
-    const handleSubmit = (event: React.FormEvent) => {
-      event.preventDefault();
-      console.log('Valor da data:', dateValue);
-    };
-  
+    const handleStartDateChange = (date: string) => {
+      setStartDateValue(date);
+    }
+
+    const handleEndDateChange = (date: string) => {
+      setEndDateValue(date);
+    }
+
+    const handleOpeartorChange = (op: string) => {
+      setOperator(op);
+    }
+    
+    useEffect(() => {
+      doSearch();
+    }, []);
+
     return (
       <Container>
-        <Header>
-          <Title>Meu Extrato</Title>
-          <ThemeToogle>
-            <Toggle
-              labelLeft="Light"
-              labelRight="Dark"
-              checked={darkTheme}
-              onChange={handleToggleTheme}
-            />
-          </ThemeToogle>
-        </Header>
-        <form onSubmit={handleSubmit}>
-          <FormContainer>
-            <DateInput label="Data de Início" onDateChange={handleDateChange} />
-            <DateInput label="Data de Fim" onDateChange={handleDateChange} />
-            <DateInput label="Nome do operador transacionado" onDateChange={handleDateChange} />
-          </FormContainer>
-          <ButtonContainer>
-            <Button type="submit">Pesquisar</Button>
-          </ButtonContainer>
-        </form>
-        <Table data={dadosExemplo}/>
+        <Content>
+          <Header>
+            <Title>Meu Extrato</Title>
+            <ThemeToogle>
+              <Toggle
+                labelLeft="Light"
+                labelRight="Dark"
+                checked={darkTheme}
+                onChange={handleToggleTheme}
+              />
+            </ThemeToogle>
+          </Header>
+          <Search>
+            <form onSubmit={handleSubmit}>
+              <FormContainer>
+                <DateInput label="Data de Início" onDateChange={handleStartDateChange} />
+                <DateInput label="Data de Fim" onDateChange={handleEndDateChange} />
+                <SimpleInput label="Nome do operador transacionado" onDateChange={handleOpeartorChange} />
+              </FormContainer>
+              <ErrorMessage display={error} text={message}/>
+              <ButtonContainer>
+                <Button type="submit">Pesquisar</Button>
+              </ButtonContainer>
+            </form>
+            <TableComponent data={data}/>
+          </Search>
+        </Content>
       </Container>
     );
 }

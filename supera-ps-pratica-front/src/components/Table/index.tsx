@@ -1,5 +1,7 @@
-import React from 'react';
-import { Container, TableContainer, Tbody, Td, TdText, Th, ThText, Thead, Tr } from './styles';
+import React, { useState } from 'react';
+import { Table, Pagination } from 'antd';
+import Column from 'antd/es/table/Column';
+import { Container } from './styles';
 
 type Data = {
   data: string;
@@ -8,72 +10,48 @@ type Data = {
   operator: string;
 }
 
-type Header = {
-  Header: string;
-  accessor: string;
-}
-
-interface TableProps {
+interface TableComponentProps {
   data: Data[];
 }
 
-const getProperty = <T extends keyof Data>(objeto: Data, propriedade: T) => {
-  return objeto[propriedade];
-};
+const TableComponent: React.FC<TableComponentProps> = ({ data }) => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(4);
 
-const Table: React.FC<TableProps> = ({ data }) => {
-  const columns = [
-      {
-        Header: 'Data',
-        accessor: 'data',
-      },
-      {
-        Header: 'Valor',
-        accessor: 'value',
-      },
-      {
-        Header: 'Tipo',
-        accessor: 'type',
-      },
-      {
-        Header: 'Operador',
-        accessor: 'operator',
-      },
-    ];
+  const handleChangePage = (page: number, pageSize?: number) => {
+    setCurrentPage(page);
+  };
 
-  console.log(data)
+  const handleChangePageSize = (current: number, size: number) => {
+    setPageSize(size);
+    setCurrentPage(1);
+  };
 
-  if (data.length === 0) {
-    return <p>Nenhuma transação disponível.</p>;
-  }
+  const slicedData = data.slice((currentPage - 1) * pageSize, (currentPage - 1) * pageSize + pageSize);
 
   return (
     <Container>
-      <TableContainer>
-        <Thead>
-          <Tr>
-            {columns.map((column) => (
-              <Th key={column.Header}>
-                <ThText>{column.Header}</ThText>
-              </Th>
-            ))}
-          </Tr>
-        </Thead>
-        <Tbody>
-          {data.map((row) => (
-              <Tr>
-                {columns.map((column) => (
-                  <Td key={column.accessor}>
-                    <TdText>{row[column.accessor as keyof Data]}</TdText>
-                  </Td>
-                ))}
-              </Tr>
-            )
-          )}
-        </Tbody>
-      </TableContainer>
+      <Table
+        dataSource={slicedData}
+        pagination={false}
+        style={{ width: '100%', height: '100%' }}
+      >
+        <Column title="Data" dataIndex="data" key="data" />
+        <Column title="Valor" dataIndex="value" key="value" />
+        <Column title="Tipo" dataIndex="type" key="type" />
+        <Column title="Operador" dataIndex="operator" key="operator" />
+      </Table>
+      <Pagination
+        current={currentPage}
+        pageSize={pageSize}
+        total={data.length}
+        onChange={handleChangePage}
+        onShowSizeChange={handleChangePageSize}
+        showSizeChanger
+        showTotal={(total, range) => `${range[0]}-${range[1]} de ${total} itens`}
+      />
     </Container>
   );
 };
 
-export default Table;
+export default TableComponent;

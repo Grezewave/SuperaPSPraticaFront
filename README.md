@@ -8,22 +8,22 @@ Antes de começar, certifique-se de ter o Node.js instalado em seu sistema. Voc�
 
 1. Clone o repositório do frontend:
 
-'''
+```
 git clone https://github.com/Grezewave/SuperaPSPraticaFront
-'''
+```
 
 
 2. Navegue até o diretório do projeto:
 
-'''
+```
 cd SuperaPSPraticaFront/supera-ps-pratica-front
-'''
+```
 
 3. Instale as dependências do projeto:
 
-'''
+```
 yarn install
-'''
+```
 
 
 ## Configuração
@@ -34,9 +34,9 @@ Antes de executar o projeto, você precisará exeucutar a URL do microserviço b
 ## Execução
 1. Após concluir a instalação e configuração, você pode executar o projeto:
 
-'''
+```
 yarn start
-'''
+```
 
 2. Abra seu navegador e acesse http://localhost:3000 para ver o frontend em ação.
 
